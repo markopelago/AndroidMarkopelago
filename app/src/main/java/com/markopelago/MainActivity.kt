@@ -21,9 +21,6 @@ import java.io.IOException
 import android.graphics.Color
 import android.support.v4.app.NotificationCompat
 
-
-
-
 var TOKEN = ""
 
 fun isNetworkAvailable(context: Context): Boolean {

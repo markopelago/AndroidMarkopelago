@@ -43,6 +43,13 @@ fun readWebView(context: Context,webview: WebView) {
                 webview!!.loadUrl(currentUrl.replace("set_apps_token=" + TOKEN,""))
             }
         }
+        if (currentUrl.toString().contains("logout_success=1")) {
+            val path = context.getFilesDir()
+            val filename = File(path.toString() + "/bWFya29wZWxhZ28=.dat")
+            TOKEN = ""
+            filename.writeText(TOKEN )
+            webview!!.loadUrl(currentUrl.replace("logout_success=1",""))
+        }
     }
     Handler().postDelayed({ readWebView(context,webview) }, 1000)
 }
@@ -147,12 +154,12 @@ class MainActivity : AppCompatActivity() {
             }
         }
         if (isNetworkAvailable(this@MainActivity)) {
-            webview!!.loadUrl(this@MainActivity.getResources().getString(R.string.SERVER_HOST) + "android_apps.php")
             val path = this@MainActivity.getFilesDir()
             val filename = File(path.toString() + "/bWFya29wZWxhZ28=.dat")
             if(filename.exists()){
                 TOKEN = FileInputStream(filename).bufferedReader().use { it.readText() }
             }
+            webview!!.loadUrl(this@MainActivity.getResources().getString(R.string.SERVER_HOST) + "android_apps.php?token=" + TOKEN)
             readWebView(this@MainActivity,webview)
             readNotification(this@MainActivity)
         } else {

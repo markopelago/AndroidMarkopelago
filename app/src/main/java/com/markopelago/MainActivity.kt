@@ -1,8 +1,6 @@
 package com.markopelago
 
-import android.app.Notification
-import android.app.NotificationManager
-import android.app.PendingIntent
+import android.app.*
 import android.content.Context
 import android.content.Intent
 import android.graphics.BitmapFactory
@@ -20,6 +18,11 @@ import okhttp3.*
 import java.io.File
 import java.io.FileInputStream
 import java.io.IOException
+import android.graphics.Color
+import android.support.v4.app.NotificationCompat
+
+
+
 
 var TOKEN = ""
 
@@ -91,14 +94,33 @@ fun showNotification(context: Context,title:String,message:String,mNotificationI
     val uri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
 
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-        mNotification = Notification.Builder(context,"com.markopelago.EXTRA_CHANNEL_ID")
-                .setContentIntent(pendingIntent)
+        val CHANNEL_ID = "Markopelago"
+        val name = "Markopelago"
+        val Description = "Markopelago Channel"
+        val importance = NotificationManager.IMPORTANCE_HIGH
+        val mChannel = NotificationChannel(CHANNEL_ID, name, importance)
+        mChannel.description = Description
+        mChannel.enableLights(true)
+        mChannel.lightColor = Color.RED
+        mChannel.enableVibration(true)
+        mChannel.vibrationPattern = longArrayOf(100, 200, 300, 400, 500, 400, 300, 200, 400)
+        mChannel.setShowBadge(false)
+        notificationManager.createNotificationChannel(mChannel)
+
+        val builder = NotificationCompat.Builder(context, CHANNEL_ID)
                 .setSmallIcon(R.mipmap.ic_launcher)
-                .setLargeIcon(BitmapFactory.decodeResource(res, R.mipmap.ic_launcher))
                 .setContentTitle(title)
-                .setStyle(Notification.BigTextStyle()
-                        .bigText(message))
-                .setContentText(message).build()
+                .setContentText(message)
+
+        val resultIntent = Intent(context, MainActivity::class.java)
+        val stackBuilder = TaskStackBuilder.create(context)
+        stackBuilder.addParentStack(MainActivity::class.java)
+        stackBuilder.addNextIntent(resultIntent)
+        val resultPendingIntent = stackBuilder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT)
+
+        builder.setContentIntent(resultPendingIntent)
+
+        notificationManager.notify(mNotificationId, builder.build())
     } else {
         mNotification = Notification.Builder(context)
                 .setContentIntent(pendingIntent)
@@ -110,9 +132,9 @@ fun showNotification(context: Context,title:String,message:String,mNotificationI
                         .bigText(message))
                 .setSound(uri)
                 .setContentText(message).build()
-
+        notificationManager.notify(mNotificationId, mNotification)
     }
-    notificationManager.notify(mNotificationId, mNotification)
+
 }
 
 class MainActivity : AppCompatActivity() {

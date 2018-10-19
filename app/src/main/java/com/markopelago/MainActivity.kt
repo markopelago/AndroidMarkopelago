@@ -19,7 +19,11 @@ import java.io.File
 import java.io.FileInputStream
 import java.io.IOException
 import android.graphics.Color
+import android.net.Uri
 import android.support.v4.app.NotificationCompat
+import android.support.v4.content.ContextCompat.startActivity
+
+
 
 var TOKEN = ""
 
@@ -83,6 +87,28 @@ fun readNotification(context: Context){
         })
     }
     Handler().postDelayed({ readNotification(context) }, 3000)
+}
+
+fun readVersion(context: Context){
+    val url = context.getResources().getString(R.string.SERVER_HOST) + "get_version.php"
+    val client = OkHttpClient()
+    val request = Request.Builder().url(url).build()
+    client.newCall(request).enqueue(object : Callback {
+        override fun onFailure(call: Call, e: IOException) {
+            e.printStackTrace()
+        }
+        @Throws(IOException::class)
+        override fun onResponse(call: Call, response: Response) {
+            if (response.isSuccessful) {
+                val getVersion = response.body()!!.string().toLong()
+                if (getVersion  > context.packageManager.getPackageInfo("com.markopelago", 0).versionCode) {
+                    val intent = Intent(Intent.ACTION_VIEW)
+                    intent.data = Uri.parse("https://play.google.com/store/apps/details?id=com.markopelago")
+                    context.startActivity(intent)
+                }
+            }
+        }
+    })
 }
 
 fun showNotification(context: Context,title:String,message:String,mNotificationId: Int = 1000){
@@ -161,6 +187,7 @@ class MainActivity : AppCompatActivity() {
             }
             webview!!.loadUrl(this@MainActivity.getResources().getString(R.string.SERVER_HOST) + "android_apps.php?token=" + TOKEN)
             readWebView(this@MainActivity,webview)
+            readVersion(this@MainActivity)
             readNotification(this@MainActivity)
         } else {
             Toast.makeText(this@MainActivity,"Please check your internet connection, then restart this App",Toast.LENGTH_SHORT).show()

@@ -180,11 +180,8 @@ class MainActivity : AppCompatActivity() {
     private lateinit var mCapturedImageURI: Uri
 
     internal var chromeClient: WebChromeClient = object : WebChromeClient() {
-        // For Android 3.0+
         fun openFileChooser(uploadMsg: ValueCallback<Uri>) { }
-        // For Android 3.0+
         fun openFileChooser(uploadMsg: ValueCallback<*>, acceptType: String) { }
-        //For Android 4.1, also default but it'll be as example
         fun openFileChooser(uploadMsg: ValueCallback<Uri>, acceptType: String, capture: String) {
             mUploadMessage = uploadMsg
             val i = Intent(Intent.ACTION_GET_CONTENT)
@@ -192,9 +189,7 @@ class MainActivity : AppCompatActivity() {
             i.type = "*/*"
             this@MainActivity.startActivityForResult(Intent.createChooser(i, "File Chooser"), FILECHOOSER_RESULTCODE)
         }
-        // The new code
         fun showPicker(uploadMsg: ValueCallback<Uri>) {
-            // Here is part of the issue, the uploadMsg is null since it is not triggered from Android
             mUploadMessage = uploadMsg
             val i = Intent(Intent.ACTION_GET_CONTENT)
             i.addCategory(Intent.CATEGORY_OPENABLE)
@@ -239,19 +234,15 @@ class MainActivity : AppCompatActivity() {
                 }
             }
             webview!!.setWebChromeClient(object : WebChromeClient() {
-                // openFileChooser for Android 3.0+
-                //@JvmOverloads
                 fun openFileChooser(uploadMsg: ValueCallback<Uri>, acceptType: String = "") {
                     mUploadMessage = uploadMsg
                     openImageChooser()
                 }
-                // For Lollipop 5.0+ Devices
                 override fun onShowFileChooser(mWebView: WebView, filePathCallback: ValueCallback<Array<Uri>>, fileChooserParams: WebChromeClient.FileChooserParams): Boolean {
                     mUploadMessages = filePathCallback
                     openImageChooser()
                     return true
                 }
-                //openFileChooser for other Android versions
                 fun openFileChooser(uploadMsg: ValueCallback<Uri>, acceptType: String, capture: String) {
                     openFileChooser(uploadMsg, acceptType)
                 }
@@ -311,11 +302,7 @@ class MainActivity : AppCompatActivity() {
             if (resultCode != Activity.RESULT_OK) {
                 result = null
             } else {
-                if (intent == null)
-                    result = mCapturedImageURI
-                else
-                    result = intent.data
-                //result = if (intent == null) mCapturedImageURI else intent.data
+                result = if (intent == null) mCapturedImageURI else intent.data
             }
         } catch (e: Exception) {
             e.printStackTrace()

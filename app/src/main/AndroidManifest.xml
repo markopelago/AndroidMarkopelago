@@ -14,16 +14,11 @@
         android:theme="@style/Theme.AppCompat.Light.NoActionBar">
         <activity android:name=".SplashScreen" android:screenOrientation="portrait">
             <intent-filter>
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity>
-        <activity android:name="com.markopelago.MainActivity" android:screenOrientation="portrait">
-            <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".MyWb" android:screenOrientation="portrait">
+        <activity android:name="com.markopelago.MainActivity" android:screenOrientation="portrait">
             <intent-filter>
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>

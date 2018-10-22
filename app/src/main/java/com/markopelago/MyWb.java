@@ -75,7 +75,8 @@ public class MyWb extends Activity {
         web.getSettings().setAllowFileAccess(true);
         web.getSettings().setAllowContentAccess(true);
         web.clearCache(true);
-        web.loadUrl("http://192.168.0.27/markopelago/api/android_apps.php");
+        //web.loadUrl("http://192.168.1.69/markopelago/api/android_apps.php");
+        web.loadUrl("http://192.168.1.69/markopelago/api/testAppsUpload.html");
         web.setWebViewClient(new myWebClient());
 
         web.setWebChromeClient(new WebChromeClient() {

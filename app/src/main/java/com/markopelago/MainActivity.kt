@@ -1,16 +1,16 @@
 package com.markopelago
 
+import android.annotation.TargetApi
 import android.app.*
 import android.content.Context
 import android.content.Intent
+import android.content.res.Configuration
+import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.media.RingtoneManager
 import android.net.ConnectivityManager
 import android.net.NetworkInfo
-import android.os.Build
 import android.support.v7.app.AppCompatActivity
-import android.os.Bundle
-import android.os.Handler
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import android.widget.Toast
@@ -20,9 +20,14 @@ import java.io.FileInputStream
 import java.io.IOException
 import android.graphics.Color
 import android.net.Uri
+import android.os.*
+import android.provider.MediaStore
 import android.support.v4.app.NotificationCompat
-import android.support.v4.content.ContextCompat.startActivity
-
+import android.view.View
+import android.webkit.ValueCallback
+import android.webkit.WebChromeClient
+import android.widget.ProgressBar
+import com.markopelago.R.id.webview
 
 
 var TOKEN = ""
@@ -168,24 +173,91 @@ fun showNotification(context: Context,title:String,message:String,mNotificationI
 }
 
 class MainActivity : AppCompatActivity() {
+    private var mUploadMessage: ValueCallback<Uri>? = null
+    private var mUploadMessages: ValueCallback<Array<Uri>>? = null
+    private val FILECHOOSER_RESULTCODE = 1
+    private val KITKAT_RESULTCODE = 2
+    private lateinit var mCapturedImageURI: Uri
+
+    internal var chromeClient: WebChromeClient = object : WebChromeClient() {
+        // For Android 3.0+
+        fun openFileChooser(uploadMsg: ValueCallback<Uri>) { }
+        // For Android 3.0+
+        fun openFileChooser(uploadMsg: ValueCallback<*>, acceptType: String) { }
+        //For Android 4.1, also default but it'll be as example
+        fun openFileChooser(uploadMsg: ValueCallback<Uri>, acceptType: String, capture: String) {
+            mUploadMessage = uploadMsg
+            val i = Intent(Intent.ACTION_GET_CONTENT)
+            i.addCategory(Intent.CATEGORY_OPENABLE)
+            i.type = "*/*"
+            this@MainActivity.startActivityForResult(Intent.createChooser(i, "File Chooser"), FILECHOOSER_RESULTCODE)
+        }
+        // The new code
+        fun showPicker(uploadMsg: ValueCallback<Uri>) {
+            // Here is part of the issue, the uploadMsg is null since it is not triggered from Android
+            mUploadMessage = uploadMsg
+            val i = Intent(Intent.ACTION_GET_CONTENT)
+            i.addCategory(Intent.CATEGORY_OPENABLE)
+            i.type = "*/*"
+            this@MainActivity.startActivityForResult(Intent.createChooser(i, "File Chooser"), KITKAT_RESULTCODE)
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        val webview: WebView = findViewById(R.id.webview) as WebView
-        webview.getSettings().setJavaScriptEnabled(true)
-        webview!!.webViewClient = object : WebViewClient() {
-            override fun shouldOverrideUrlLoading(view: WebView?, url: String?): Boolean {
-                view?.loadUrl(url)
-                return true
-            }
-        }
+        var webview: WebView = findViewById(R.id.webview) as WebView
+        var progressBar: ProgressBar = findViewById<View>(R.id.progressBar1) as ProgressBar
+
         if (isNetworkAvailable(this@MainActivity)) {
             val path = this@MainActivity.getFilesDir()
             val filename = File(path.toString() + "/bWFya29wZWxhZ28=.dat")
             if(filename.exists()){
                 TOKEN = FileInputStream(filename).bufferedReader().use { it.readText() }
             }
+            webview = WebView(this)
+            webview.getSettings().setJavaScriptEnabled(true)
+            webview.addJavascriptInterface(chromeClient, "jsi" );
+            webview.getSettings().setAllowFileAccess(true);
+            webview.getSettings().setAllowContentAccess(true);
+            webview.clearCache(true);
             webview!!.loadUrl(this@MainActivity.getResources().getString(R.string.SERVER_HOST) + "android_apps.php?token=" + TOKEN)
+            //webview!!.loadUrl(this@MainActivity.getResources().getString(R.string.SERVER_HOST) + "testAppsUpload.html")
+            webview!!.webViewClient = object : WebViewClient() {
+                override fun onPageStarted(view: WebView, url: String, favicon: Bitmap?) {
+                    // TODO Auto-generated method stub
+                    super.onPageStarted(view, url, favicon)
+                }
+                override fun shouldOverrideUrlLoading(view: WebView?, url: String?): Boolean {
+                    view?.loadUrl(url)
+                    return true
+                }
+                override fun onPageFinished(view: WebView, url: String) {
+                    // TODO Auto-generated method stub
+                    super.onPageFinished(view, url)
+                    progressBar.setVisibility(View.GONE)
+                }
+            }
+            webview!!.setWebChromeClient(object : WebChromeClient() {
+                // openFileChooser for Android 3.0+
+                //@JvmOverloads
+                fun openFileChooser(uploadMsg: ValueCallback<Uri>, acceptType: String = "") {
+                    mUploadMessage = uploadMsg
+                    openImageChooser()
+                }
+                // For Lollipop 5.0+ Devices
+                override fun onShowFileChooser(mWebView: WebView, filePathCallback: ValueCallback<Array<Uri>>, fileChooserParams: WebChromeClient.FileChooserParams): Boolean {
+                    mUploadMessages = filePathCallback
+                    openImageChooser()
+                    return true
+                }
+                //openFileChooser for other Android versions
+                fun openFileChooser(uploadMsg: ValueCallback<Uri>, acceptType: String, capture: String) {
+                    openFileChooser(uploadMsg, acceptType)
+                }
+            })
+            setContentView(webview)
+
             readWebView(this@MainActivity,webview)
             readVersion(this@MainActivity)
             readNotification(this@MainActivity)
@@ -193,6 +265,112 @@ class MainActivity : AppCompatActivity() {
             Toast.makeText(this@MainActivity,"Please check your internet connection, then restart this App",Toast.LENGTH_SHORT).show()
         }
     }
+
+    private fun openImageChooser() {
+        try {
+            val imageStorageDir = File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES), "FolderName")
+            if (!imageStorageDir.exists()) {
+                imageStorageDir.mkdirs()
+            }
+            val file = File(imageStorageDir.toString() + File.separator + "IMG_" + System.currentTimeMillis().toString() + ".jpg")
+            mCapturedImageURI = Uri.fromFile(file)
+
+            val captureIntent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
+            captureIntent.putExtra(MediaStore.EXTRA_OUTPUT, mCapturedImageURI)
+
+            val i = Intent(Intent.ACTION_GET_CONTENT)
+            i.addCategory(Intent.CATEGORY_OPENABLE)
+            i.type = "image/*"
+
+            val chooserIntent = Intent.createChooser(i, "Image Chooser")
+            chooserIntent.putExtra(Intent.EXTRA_INITIAL_INTENTS, arrayOf<Parcelable>(captureIntent))
+
+            startActivityForResult(chooserIntent, FILECHOOSER_RESULTCODE)
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
+
+    protected override fun onActivityResult(requestCode: Int, resultCode: Int, intent: Intent?) {
+        super.onActivityResult(requestCode, resultCode, intent)
+        if (requestCode == FILECHOOSER_RESULTCODE) {
+            if (null == mUploadMessage && null == mUploadMessages) {
+                return
+            }
+            if (null != mUploadMessage) {
+                handleUploadMessage(requestCode, resultCode, intent)
+            } else if (mUploadMessages != null) {
+                handleUploadMessages(requestCode, resultCode, intent)
+            }
+        }
+    }
+
+    private fun handleUploadMessage(requestCode: Int, resultCode: Int, intent: Intent?) {
+        var result: Uri? = null
+        try {
+            if (resultCode != Activity.RESULT_OK) {
+                result = null
+            } else {
+                if (intent == null)
+                    result = mCapturedImageURI
+                else
+                    result = intent.data
+                //result = if (intent == null) mCapturedImageURI else intent.data
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+        try {
+            mUploadMessage!!.onReceiveValue(result)
+            mUploadMessage = null
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
+
+    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
+    private fun handleUploadMessages(requestCode: Int, resultCode: Int, intent: Intent?) {
+        var results: Array<Uri>? = null
+        try {
+            if (resultCode != Activity.RESULT_OK) {
+                results = null
+            } else {
+                if (intent != null) {
+                    val dataString = intent.dataString
+                    val clipData = intent.clipData
+                    if (clipData != null) {
+                        //results = arrayOfNulls(clipData.itemCount)
+                        for (i in 0 until clipData.itemCount) {
+                            val item = clipData.getItemAt(i)
+                            results!![i] = item.uri
+                        }
+                    }
+                    if (dataString != null) {
+                        results = arrayOf(Uri.parse(dataString))
+                    }
+                } else {
+                    results = arrayOf<Uri>(mCapturedImageURI)
+                }
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+        try {
+            mUploadMessages!!.onReceiveValue(results)
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+        try {
+            mUploadMessages = null
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
+
+    override fun onConfigurationChanged(newConfig: Configuration) {
+        super.onConfigurationChanged(newConfig)
+    }
+
     override fun onBackPressed() {
         super.onBackPressed()
         moveTaskToBack(true)

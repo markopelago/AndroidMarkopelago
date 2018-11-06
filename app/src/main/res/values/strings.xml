@@ -1,5 +1,4 @@
 <resources>
     <string name="app_name">Markopelago</string>
-    <string name="SERVER_HOSTX">http://192.168.1.69/markopelago/api/</string>
     <string name="SERVER_HOST">https://www.markopelago.com/api/</string>
 </resources>

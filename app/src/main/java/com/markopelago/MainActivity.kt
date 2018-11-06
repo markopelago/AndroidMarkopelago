@@ -27,7 +27,6 @@ import android.view.View
 import android.webkit.ValueCallback
 import android.webkit.WebChromeClient
 import android.widget.ProgressBar
-import com.markopelago.R.id.webview
 
 
 var TOKEN = ""
@@ -143,8 +142,12 @@ fun showNotification(context: Context,title:String,message:String,mNotificationI
         notificationManager.createNotificationChannel(mChannel)
 
         val builder = NotificationCompat.Builder(context, CHANNEL_ID)
-                .setSmallIcon(R.mipmap.ic_launcher)
+                .setContentIntent(pendingIntent)
+                .setSmallIcon(R.drawable.ic_stat_name)
+                .setLargeIcon(BitmapFactory.decodeResource(res, R.drawable.icon))
+                .setPriority(Notification.PRIORITY_MAX)
                 .setContentTitle(title)
+                .setSound(uri)
                 .setContentText(message)
 
         val resultIntent = Intent(context, MainActivity::class.java)
@@ -159,7 +162,7 @@ fun showNotification(context: Context,title:String,message:String,mNotificationI
     } else {
         mNotification = Notification.Builder(context)
                 .setContentIntent(pendingIntent)
-                .setSmallIcon(R.mipmap.ic_launcher)
+                .setSmallIcon(R.drawable.ic_stat_name)
                 .setLargeIcon(BitmapFactory.decodeResource(res, R.mipmap.ic_launcher))
                 .setPriority(Notification.PRIORITY_MAX)
                 .setContentTitle(title)
@@ -178,6 +181,7 @@ class MainActivity : AppCompatActivity() {
     private val FILECHOOSER_RESULTCODE = 1
     private val KITKAT_RESULTCODE = 2
     private lateinit var mCapturedImageURI: Uri
+    private lateinit var webview: WebView
 
     internal var chromeClient: WebChromeClient = object : WebChromeClient() {
         fun openFileChooser(uploadMsg: ValueCallback<Uri>) { }
@@ -201,7 +205,7 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        var webview: WebView = findViewById(R.id.webview) as WebView
+        webview = findViewById(R.id.webview) as WebView
         var progressBar: ProgressBar = findViewById<View>(R.id.progressBar1) as ProgressBar
 
         if (isNetworkAvailable(this@MainActivity)) {
@@ -216,8 +220,6 @@ class MainActivity : AppCompatActivity() {
             webview.getSettings().setAllowFileAccess(true);
             webview.getSettings().setAllowContentAccess(true);
             webview.clearCache(true);
-            webview!!.loadUrl(this@MainActivity.getResources().getString(R.string.SERVER_HOST) + "android_apps.php?token=" + TOKEN)
-            //webview!!.loadUrl(this@MainActivity.getResources().getString(R.string.SERVER_HOST) + "testAppsUpload.html")
             webview!!.webViewClient = object : WebViewClient() {
                 override fun onPageStarted(view: WebView, url: String, favicon: Bitmap?) {
                     // TODO Auto-generated method stub
@@ -233,6 +235,7 @@ class MainActivity : AppCompatActivity() {
                     progressBar.setVisibility(View.GONE)
                 }
             }
+            webview!!.loadUrl(this@MainActivity.getResources().getString(R.string.SERVER_HOST) + "android_apps.php?token=" + TOKEN)
             webview!!.setWebChromeClient(object : WebChromeClient() {
                 fun openFileChooser(uploadMsg: ValueCallback<Uri>, acceptType: String = "") {
                     mUploadMessage = uploadMsg
@@ -252,6 +255,7 @@ class MainActivity : AppCompatActivity() {
             readWebView(this@MainActivity,webview)
             readVersion(this@MainActivity)
             readNotification(this@MainActivity)
+
         } else {
             Toast.makeText(this@MainActivity,"Please check your internet connection, then restart this App",Toast.LENGTH_SHORT).show()
         }
@@ -359,8 +363,11 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onBackPressed() {
-        super.onBackPressed()
-        moveTaskToBack(true)
-        System.exit(-1)
+        if (webview.canGoBack()) {
+            webview.goBack()
+        } else {
+            moveTaskToBack(true)
+            System.exit(-1)
+        }
     }
 }

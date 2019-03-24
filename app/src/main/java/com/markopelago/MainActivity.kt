@@ -11,8 +11,6 @@ import android.media.RingtoneManager
 import android.net.ConnectivityManager
 import android.net.NetworkInfo
 import android.support.v7.app.AppCompatActivity
-import android.webkit.WebView
-import android.webkit.WebViewClient
 import android.widget.Toast
 import okhttp3.*
 import java.io.File
@@ -24,8 +22,7 @@ import android.os.*
 import android.provider.MediaStore
 import android.support.v4.app.NotificationCompat
 import android.view.View
-import android.webkit.ValueCallback
-import android.webkit.WebChromeClient
+import android.webkit.*
 import android.widget.ProgressBar
 
 
@@ -36,30 +33,6 @@ fun isNetworkAvailable(context: Context): Boolean {
     var activeNetworkInfo: NetworkInfo? = null
     activeNetworkInfo = cm.activeNetworkInfo
     return activeNetworkInfo != null && activeNetworkInfo.isConnectedOrConnecting
-}
-
-fun readWebView(context: Context,webview: WebView) {
-    val currentUrl = webview.originalUrl
-    if(currentUrl != null) {
-        if (currentUrl.toString().contains("set_apps_token=")) {
-            val temp = currentUrl.split("set_apps_token=")
-            TOKEN = temp[1]
-            if(TOKEN!="") {
-                val path = context.getFilesDir()
-                val filename = File(path.toString() + "/bWFya29wZWxhZ28=.dat")
-                filename.writeText(TOKEN)
-                webview!!.loadUrl(currentUrl.replace("set_apps_token=" + TOKEN,""))
-            }
-        }
-        if (currentUrl.toString().contains("logout_success=1")) {
-            val path = context.getFilesDir()
-            val filename = File(path.toString() + "/bWFya29wZWxhZ28=.dat")
-            TOKEN = ""
-            filename.writeText(TOKEN )
-            webview!!.loadUrl(currentUrl.replace("logout_success=1",""))
-        }
-    }
-    Handler().postDelayed({ readWebView(context,webview) }, 1000)
 }
 
 fun readNotification(context: Context){
@@ -90,7 +63,7 @@ fun readNotification(context: Context){
             }
         })
     }
-    Handler().postDelayed({ readNotification(context) }, 3000)
+    Handler().postDelayed({ readNotification(context) }, 5000)
 }
 
 fun readVersion(context: Context){
@@ -215,6 +188,10 @@ class MainActivity : AppCompatActivity() {
                 TOKEN = FileInputStream(filename).bufferedReader().use { it.readText() }
             }
             webview = WebView(this)
+            webview.getSettings().setAppCacheMaxSize( 10 * 1024 * 1024 ); // 10MB
+            webview.getSettings().setAppCachePath( getApplicationContext().getCacheDir().getAbsolutePath() );
+            webview.getSettings().setAppCacheEnabled(true);
+            webview.getSettings().setCacheMode( WebSettings.LOAD_DEFAULT ); // load online by default
             webview.getSettings().setJavaScriptEnabled(true)
             webview.addJavascriptInterface(chromeClient, "jsi" );
             webview.getSettings().setAllowFileAccess(true);
@@ -226,7 +203,37 @@ class MainActivity : AppCompatActivity() {
                     super.onPageStarted(view, url, favicon)
                 }
                 override fun shouldOverrideUrlLoading(view: WebView?, url: String?): Boolean {
-                    view?.loadUrl(url)
+
+
+                    if(url != null) {
+                        if (url.toString().contains("https://api.whatsapp.com/send")) {
+                            view?.getContext()?.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)));
+                            return true;
+                        }else{
+                            view?.loadUrl(url);
+
+                            if (url.toString().contains("set_apps_token=")) {
+                                val temp = url.split("set_apps_token=")
+                                TOKEN = temp[1]
+                                if(TOKEN!="") {
+                                    val path = this@MainActivity.getFilesDir()
+                                    val filename = File(path.toString() + "/bWFya29wZWxhZ28=.dat")
+                                    filename.writeText(TOKEN)
+                                    webview!!.loadUrl(url.replace("set_apps_token=" + TOKEN,""))
+                                }
+                            }
+                            if (url.toString().contains("logout_success=1")) {
+                                val path = this@MainActivity.getFilesDir()
+                                val filename = File(path.toString() + "/bWFya29wZWxhZ28=.dat")
+                                TOKEN = ""
+                                filename.writeText(TOKEN )
+                                webview!!.loadUrl(url.replace("logout_success=1",""))
+                            }
+                        }
+                    } else {
+                        view?.loadUrl(url);
+                    }
+
                     return true
                 }
                 override fun onPageFinished(view: WebView, url: String) {
@@ -252,7 +259,7 @@ class MainActivity : AppCompatActivity() {
             })
             setContentView(webview)
 
-            readWebView(this@MainActivity,webview)
+            //readWebView(this@MainActivity,webview)
             readVersion(this@MainActivity)
             readNotification(this@MainActivity)
 

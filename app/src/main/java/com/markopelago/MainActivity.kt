@@ -208,7 +208,6 @@ class MainActivity : AppCompatActivity() {
                     if(url != null) {
                         if (url.toString().contains("https://api.whatsapp.com/send")) {
                             view?.getContext()?.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)));
-                            return true;
                         }else{
                             view?.loadUrl(url);
 

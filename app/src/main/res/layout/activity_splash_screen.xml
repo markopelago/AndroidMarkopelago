@@ -11,12 +11,13 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:src="@drawable/splashscreen"
-        android:background="@color/spalshBgColor"
+        android:background="@color/spalshBgColor2"
         android:contentDescription="@string/app_name"
         />
 
     <TextView
         android:id="@+id/txtVersion"
+        android:textColor="@color/spalshBgColor"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginEnd="16dp"

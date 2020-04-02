@@ -16,10 +16,37 @@
                             <entry key="actionbar">
                               <value>
                                 <PersistentState>
+                                  <option name="children">
+                                    <map>
+                                      <entry key="clipArt">
+                                        <value>
+                                          <PersistentState>
+                                            <option name="values">
+                                              <map>
+                                                <entry key="color" value="000000" />
+                                              </map>
+                                            </option>
+                                          </PersistentState>
+                                        </value>
+                                      </entry>
+                                      <entry key="image">
+                                        <value>
+                                          <PersistentState>
+                                            <option name="values">
+                                              <map>
+                                                <entry key="color" value="000000" />
+                                                <entry key="opacityPercent" value="60" />
+                                              </map>
+                                            </option>
+                                          </PersistentState>
+                                        </value>
+                                      </entry>
+                                    </map>
+                                  </option>
                                   <option name="values">
                                     <map>
                                       <entry key="assetType" value="IMAGE" />
-                                      <entry key="imageAsset" value="$PROJECT_DIR$/../full_logo.png" />
+                                      <entry key="imageAsset" value="C:\Users\dhove\Documents\MarkoPelago\full_logo.png" />
                                     </map>
                                   </option>
                                 </PersistentState>
@@ -35,7 +62,7 @@
                                           <PersistentState>
                                             <option name="values">
                                               <map>
-                                                <entry key="scalingPercent" value="63" />
+                                                <entry key="scalingPercent" value="60" />
                                               </map>
                                             </option>
                                           </PersistentState>
@@ -46,7 +73,7 @@
                                           <PersistentState>
                                             <option name="values">
                                               <map>
-                                                <entry key="scalingPercent" value="63" />
+                                                <entry key="scalingPercent" value="62" />
                                               </map>
                                             </option>
                                           </PersistentState>
@@ -56,10 +83,8 @@
                                   </option>
                                   <option name="values">
                                     <map>
-                                      <entry key="backgroundColor" value="ffffff" />
-                                      <entry key="backgroundImage" value="$PROJECT_DIR$/app/src/main/res/drawable/icon.png" />
-                                      <entry key="foregroundImage" value="$PROJECT_DIR$/app/src/main/res/drawable/icon.png" />
-                                      <entry key="previewDensity" value="XXHIGH" />
+                                      <entry key="backgroundImage" value="C:\Users\dhove\Documents\MarkoPelago\apps_logo_20200401\marko_icon_256.png" />
+                                      <entry key="foregroundImage" value="C:\Users\dhove\Documents\MarkoPelago\apps_logo_20200401\marko_icon_256.png" />
                                     </map>
                                   </option>
                                 </PersistentState>
@@ -68,11 +93,37 @@
                             <entry key="launcherLegacy">
                               <value>
                                 <PersistentState>
+                                  <option name="children">
+                                    <map>
+                                      <entry key="clipArt">
+                                        <value>
+                                          <PersistentState>
+                                            <option name="values">
+                                              <map>
+                                                <entry key="color" value="000000" />
+                                              </map>
+                                            </option>
+                                          </PersistentState>
+                                        </value>
+                                      </entry>
+                                      <entry key="image">
+                                        <value>
+                                          <PersistentState>
+                                            <option name="values">
+                                              <map>
+                                                <entry key="color" value="000000" />
+                                              </map>
+                                            </option>
+                                          </PersistentState>
+                                        </value>
+                                      </entry>
+                                    </map>
+                                  </option>
                                   <option name="values">
                                     <map>
                                       <entry key="assetType" value="IMAGE" />
                                       <entry key="iconShape" value="NONE" />
-                                      <entry key="imageAsset" value="$PROJECT_DIR$/../notification_icon.png" />
+                                      <entry key="imageAsset" value="C:\Users\dhove\Documents\MarkoPelago\notification_icon.png" />
                                     </map>
                                   </option>
                                 </PersistentState>
@@ -81,10 +132,36 @@
                             <entry key="notification">
                               <value>
                                 <PersistentState>
+                                  <option name="children">
+                                    <map>
+                                      <entry key="clipArt">
+                                        <value>
+                                          <PersistentState>
+                                            <option name="values">
+                                              <map>
+                                                <entry key="color" value="000000" />
+                                              </map>
+                                            </option>
+                                          </PersistentState>
+                                        </value>
+                                      </entry>
+                                      <entry key="image">
+                                        <value>
+                                          <PersistentState>
+                                            <option name="values">
+                                              <map>
+                                                <entry key="color" value="000000" />
+                                              </map>
+                                            </option>
+                                          </PersistentState>
+                                        </value>
+                                      </entry>
+                                    </map>
+                                  </option>
                                   <option name="values">
                                     <map>
                                       <entry key="assetType" value="IMAGE" />
-                                      <entry key="imageAsset" value="$PROJECT_DIR$/../notification_icon.png" />
+                                      <entry key="imageAsset" value="C:\Users\dhove\Documents\MarkoPelago\notification_icon.png" />
                                     </map>
                                   </option>
                                 </PersistentState>

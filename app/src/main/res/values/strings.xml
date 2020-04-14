@@ -1,4 +1,4 @@
 <resources>
-    <string name="app_name">Markopelago</string>
+    <string name="app_name">Marko Pasar</string>
     <string name="SERVER_HOST">https://www.markopelago.com/api/</string>
 </resources>

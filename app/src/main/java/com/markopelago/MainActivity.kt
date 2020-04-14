@@ -4,7 +4,7 @@ import android.annotation.TargetApi
 import android.app.*
 import android.content.Context
 import android.content.Intent
-import android.content.res.Configuration
+//import android.content.res.Configuration
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.media.RingtoneManager
@@ -24,6 +24,7 @@ import android.support.v4.app.NotificationCompat
 import android.view.View
 import android.webkit.*
 import android.widget.ProgressBar
+import kotlin.system.exitProcess
 
 
 var TOKEN = ""
@@ -152,33 +153,33 @@ class MainActivity : AppCompatActivity() {
     private var mUploadMessage: ValueCallback<Uri>? = null
     private var mUploadMessages: ValueCallback<Array<Uri>>? = null
     private val FILECHOOSER_RESULTCODE = 1
-    private val KITKAT_RESULTCODE = 2
+//    private val KITKAT_RESULTCODE = 2
     private lateinit var mCapturedImageURI: Uri
     private lateinit var webview: WebView
 
-    internal var chromeClient: WebChromeClient = object : WebChromeClient() {
-        fun openFileChooser(uploadMsg: ValueCallback<Uri>) { }
-        fun openFileChooser(uploadMsg: ValueCallback<*>, acceptType: String) { }
-        fun openFileChooser(uploadMsg: ValueCallback<Uri>, acceptType: String, capture: String) {
-            mUploadMessage = uploadMsg
-            val i = Intent(Intent.ACTION_GET_CONTENT)
-            i.addCategory(Intent.CATEGORY_OPENABLE)
-            i.type = "*/*"
-            this@MainActivity.startActivityForResult(Intent.createChooser(i, "File Chooser"), FILECHOOSER_RESULTCODE)
-        }
-        fun showPicker(uploadMsg: ValueCallback<Uri>) {
-            mUploadMessage = uploadMsg
-            val i = Intent(Intent.ACTION_GET_CONTENT)
-            i.addCategory(Intent.CATEGORY_OPENABLE)
-            i.type = "*/*"
-            this@MainActivity.startActivityForResult(Intent.createChooser(i, "File Chooser"), KITKAT_RESULTCODE)
-        }
-    }
+//    private var chromeClient: WebChromeClient = object : WebChromeClient() {
+//        fun openFileChooser(uploadMsg: ValueCallback<Uri>) { }
+//        fun openFileChooser(uploadMsg: ValueCallback<*>, acceptType: String) { }
+//        fun openFileChooser(uploadMsg: ValueCallback<Uri>, acceptType: String, capture: String) {
+//            mUploadMessage = uploadMsg
+//            val i = Intent(Intent.ACTION_GET_CONTENT)
+//            i.addCategory(Intent.CATEGORY_OPENABLE)
+//            i.type = "*/*"
+//            this@MainActivity.startActivityForResult(Intent.createChooser(i, "File Chooser"), FILECHOOSER_RESULTCODE)
+//        }
+//        fun showPicker(uploadMsg: ValueCallback<Uri>) {
+//            mUploadMessage = uploadMsg
+//            val i = Intent(Intent.ACTION_GET_CONTENT)
+//            i.addCategory(Intent.CATEGORY_OPENABLE)
+//            i.type = "*/*"
+//            this@MainActivity.startActivityForResult(Intent.createChooser(i, "File Chooser"), KITKAT_RESULTCODE)
+//        }
+//    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        webview = findViewById(R.id.webview) as WebView
+        webview = findViewById<WebView>(R.id.webview)
         var progressBar: ProgressBar = findViewById<View>(R.id.progressBar1) as ProgressBar
 
         if (isNetworkAvailable(this@MainActivity)) {
@@ -193,7 +194,7 @@ class MainActivity : AppCompatActivity() {
             webview.getSettings().setAppCacheEnabled(true);
             webview.getSettings().setCacheMode( WebSettings.LOAD_DEFAULT ); // load online by default
             webview.getSettings().setJavaScriptEnabled(true)
-            webview.addJavascriptInterface(chromeClient, "jsi" );
+            //webview.addJavascriptInterface(chromeClient, "jsi" );
             webview.getSettings().setAllowFileAccess(true);
             webview.getSettings().setAllowContentAccess(true);
             webview.clearCache(true);
@@ -236,7 +237,6 @@ class MainActivity : AppCompatActivity() {
                     return true
                 }
                 override fun onPageFinished(view: WebView, url: String) {
-                    // TODO Auto-generated method stub
                     super.onPageFinished(view, url)
                     progressBar.setVisibility(View.GONE)
                 }
@@ -292,7 +292,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    protected override fun onActivityResult(requestCode: Int, resultCode: Int, intent: Intent?) {
+    override fun onActivityResult(requestCode: Int, resultCode: Int, intent: Intent?) {
         super.onActivityResult(requestCode, resultCode, intent)
         if (requestCode == FILECHOOSER_RESULTCODE) {
             if (null == mUploadMessage && null == mUploadMessages) {
@@ -364,16 +364,16 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    override fun onConfigurationChanged(newConfig: Configuration) {
-        super.onConfigurationChanged(newConfig)
-    }
+//    override fun onConfigurationChanged(newConfig: Configuration) {
+//        super.onConfigurationChanged(newConfig)
+//    }
 
     override fun onBackPressed() {
         if (webview.canGoBack()) {
             webview.goBack()
         } else {
             moveTaskToBack(true)
-            System.exit(-1)
+            exitProcess(-1)
         }
     }
 }
